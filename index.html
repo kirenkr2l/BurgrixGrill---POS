@@ -10,64 +10,36 @@ h1,h3{text-align:center;margin:5px;}
 section{margin-bottom:15px;}
 button{padding:10px;margin:3px;font-size:14px;border:none;border-radius:8px;color:#fff;cursor:pointer;transition:0.2s;}
 button:active{transform:scale(0.95);}
-
-/* Menu Buttons */
 .item-btn{background:#ff6a00;}
 .extra-btn{background:#6a5acd;}
 .qty-btn{background:#444;}
 .payment-btn{background:#00b050;}
 .active{outline:3px solid #000;background-color:#ffa500;}
-
-/* Submit Buttons */
 .submit-btn{width:100%;padding:15px;font-size:18px;border-radius:10px;background:#0073e6;color:#fff;margin-top:10px;}
 .reset-btn{background:#ff4d4d;}
 .undo-btn{background:#ffa500;}
-
-/* Total & Orders */
 .total,.order-summary{font-size:18px;font-weight:bold;margin-top:10px;}
 .order-item{background:#ffe0c4;border-radius:6px;padding:10px;margin-bottom:5px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
 .order-status{font-size:12px;padding:3px 6px;border-radius:4px;color:#fff;}
 .status-Pending{background:#ff9900;}
 .status-Preparing{background:#0073e6;}
 .status-Completed{background:#28a745;}
-
-/* Modal */
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:999;}
 .modal-content{background:#fff;padding:15px;border-radius:10px;width:90%;max-width:400px;position:relative;}
 .close-modal{position:absolute;top:5px;right:10px;font-size:20px;cursor:pointer;font-weight:bold;color:#ff4d4d;}
 .modal-content button{width:100%;margin:5px 0;padding:10px;border-radius:8px;font-size:16px;}
-
-/* Admin Panel */
 .admin-panel{display:none;background:#f0f0f0;padding:10px;border-radius:8px;margin-top:10px;}
 .admin-input{margin-bottom:5px;width:100%;padding:5px;font-size:14px;}
-
-/* Floating Admin Button */
-#adminBtn{
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  background:#0073e6;
-  color:#fff;
-  border:none;
-  padding:12px 15px;
-  border-radius:50px;
-  cursor:pointer;
-  z-index:999;
-  box-shadow:0 4px 8px rgba(0,0,0,0.3);
-  font-weight:bold;
-}
-
+#adminBtn{position: fixed;top: 10px;right: 10px;background:#0073e6;color:#fff;border:none;padding:12px 15px;border-radius:50px;cursor:pointer;z-index:999;box-shadow:0 4px 8px rgba(0,0,0,0.3);font-weight:bold;}
 button:hover{opacity:0.85;}
 </style>
 </head>
 <body>
 
-<!-- Floating Admin Button -->
-<button id="adminBtn" onclick="scrollToAdmin()">Admin</button>
+<button id="adminBtn" onclick="toggleAdmin()">Admin</button>
 
 <h1>🍔 BURGRIX POS</h1>
 
-<!-- Menu Selection -->
 <section>
 <h3>Main Menu</h3>
 <div id="menuItems"></div>
@@ -108,7 +80,6 @@ button:hover{opacity:0.85;}
 <div id="orderList"></div>
 </section>
 
-<!-- Order Modal -->
 <div id="orderModal" class="modal">
   <div class="modal-content">
     <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -116,24 +87,23 @@ button:hover{opacity:0.85;}
   </div>
 </div>
 
-<!-- Hidden Admin Panel -->
 <div id="adminPanel" class="admin-panel">
 <h3>Admin Panel – Add Menu / Add-ons</h3>
 <label>Password:</label><input class="admin-input" type="password" id="adminPass" placeholder="Enter password">
 <button class="submit-btn" style="background:#0073e6;" onclick="unlockAdmin()">Unlock</button>
 <div id="adminContent" style="display:none;">
-  <label>Main Menu Name:</label><input class="admin-input" id="newMenuName" placeholder="Burger Name">
-  <label>Price (RM):</label><input class="admin-input" id="newMenuPrice" type="number" step="0.01" placeholder="Price">
-  <label>Stock:</label><input class="admin-input" id="newMenuStock" type="number" placeholder="Stock">
-  <button class="submit-btn" style="background:#28a745;" onclick="addNewMenu()">Add New Menu</button>
-  <h4>Existing Main Menu:</h4><div id="editMenuList"></div>
+<label>Main Menu Name:</label><input class="admin-input" id="newMenuName" placeholder="Burger Name">
+<label>Price (RM):</label><input class="admin-input" id="newMenuPrice" type="number" step="0.01" placeholder="Price">
+<label>Stock:</label><input class="admin-input" id="newMenuStock" type="number" placeholder="Stock">
+<button class="submit-btn" style="background:#28a745;" onclick="addNewMenu()">Add New Menu</button>
+<h4>Existing Main Menu:</h4><div id="editMenuList"></div>
 
-  <h3>Add-ons Name:</h3>
-  <input class="admin-input" id="newExtraName" placeholder="Add-on Name">
-  <label>Price (RM):</label><input class="admin-input" id="newExtraPrice" type="number" step="0.01" placeholder="Price">
-  <label>Stock:</label><input class="admin-input" id="newExtraStock" type="number" placeholder="Stock">
-  <button class="submit-btn" style="background:#28a745;" onclick="addNewExtra()">Add New Add-on</button>
-  <h4>Existing Add-ons:</h4><div id="editExtraList"></div>
+<h3>Add-ons Name:</h3>
+<input class="admin-input" id="newExtraName" placeholder="Add-on Name">
+<label>Price (RM):</label><input class="admin-input" id="newExtraPrice" type="number" step="0.01" placeholder="Price">
+<label>Stock:</label><input class="admin-input" id="newExtraStock" type="number" placeholder="Stock">
+<button class="submit-btn" style="background:#28a745;" onclick="addNewExtra()">Add New Add-on</button>
+<h4>Existing Add-ons:</h4><div id="editExtraList"></div>
 </div>
 </div>
 
@@ -155,15 +125,14 @@ let extras=[
   {name:"Fried Egg",price:2.0,stock:50}
 ];
 
-// ===== State =====
+// ===== STATE =====
 let selectedItem=null, selectedExtras=[], quantity=1, paymentMethod="", currentOrders=[], lastAdded=null;
 
-// ===== Render Functions =====
+// ===== RENDER MENU & EXTRAS =====
 function renderMenu(){
   const div=document.getElementById("menuItems"); div.innerHTML="";
   menu.forEach(item=>{
-    const btn=document.createElement("button");
-    btn.classList.add("item-btn"); btn.disabled=item.stock<=0;
+    const btn=document.createElement("button"); btn.className="item-btn"; btn.disabled=item.stock<=0;
     btn.innerText=`${item.name} – RM${item.price.toFixed(2)} (Stock:${item.stock})`;
     btn.onclick=()=>{
       if(selectedItem && selectedItem.name===item.name){ selectedItem=null; btn.classList.remove('active'); selectedExtras=[]; document.querySelectorAll('.extra-btn').forEach(b=>b.classList.remove('active')); updateSubtotalDisplay(); return; }
@@ -177,7 +146,7 @@ function renderMenu(){
 function renderExtras(){
   const div=document.getElementById("extraItems"); div.innerHTML="";
   extras.forEach(item=>{
-    const btn=document.createElement("button"); btn.classList.add("extra-btn"); btn.disabled=item.stock<=0;
+    const btn=document.createElement("button"); btn.className="extra-btn"; btn.disabled=item.stock<=0;
     btn.innerText=`${item.name} – RM${item.price.toFixed(2)} (Stock:${item.stock})`;
     btn.onclick=()=>{
       const idx=selectedExtras.findIndex(e=>e.name===item.name);
@@ -192,7 +161,7 @@ function renderExtras(){
 // ===== Quantity Buttons =====
 const qtyDiv=document.getElementById("qtyButtons");
 for(let i=1;i<=20;i++){
-  const btn=document.createElement("button"); btn.classList.add("qty-btn"); btn.innerText=i;
+  const btn=document.createElement("button"); btn.className="qty-btn"; btn.innerText=i;
   btn.onclick=()=>{ quantity=i; document.querySelectorAll('.qty-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); updateSubtotalDisplay(); };
   qtyDiv.appendChild(btn);
 }
@@ -219,13 +188,13 @@ function addToOrder(){
   document.querySelectorAll('.item-btn,.extra-btn,.qty-btn').forEach(b=>b.classList.remove('active')); updateSubtotalDisplay();
 }
 
-// ===== Order List =====
+// ===== Render Orders =====
 function updateOrderList(){
   const listDiv=document.getElementById("orderList"); listDiv.innerHTML="";
   let total=0;
   currentOrders.forEach((o,index)=>{
     total+=o.price;
-    const div=document.createElement("div"); div.classList.add("order-item"); 
+    const div=document.createElement("div"); div.className="order-item"; 
     div.innerHTML=`<span>${o.name} x ${o.qty} – RM ${o.price.toFixed(2)}</span> <span class="order-status status-${o.status}">${o.status}</span>`;
     div.onclick=()=>{ openModal(o); };
     listDiv.appendChild(div);
@@ -257,21 +226,21 @@ function markPreparing(index){ currentOrders[index].status="Preparing"; currentO
 function markCompleted(index){ currentOrders[index].status="Completed"; currentOrders[index].timeCompleted=new Date(); updateOrderList(); openModal(currentOrders[index]); }
 function formatDate(d){ if(!d) return ''; return `${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`; }
 
-// ===== Delete / Reset / Undo =====
+// ===== Reset / Undo / Delete =====
 function deleteOrder(index){ currentOrders.splice(index,1); updateOrderList(); renderMenu(); renderExtras(); }
 function resetOrder(){ currentOrders=[]; lastAdded=null; selectedItem=null; selectedExtras=[]; quantity=1; paymentMethod=""; document.querySelectorAll('.item-btn,.extra-btn,.qty-btn,.payment-btn').forEach(b=>b.classList.remove('active')); updateOrderList(); updateSubtotalDisplay(); renderMenu(); renderExtras(); document.getElementById("ackButtons").style.display="none"; }
 function undoLast(){ if(!lastAdded){ alert("Nothing to undo."); return; } deleteOrder(currentOrders.indexOf(lastAdded)); lastAdded=null; }
 
-// ===== Acknowledgment =====
+// ===== Submit / Ack =====
 function submitOrders(){ if(currentOrders.length===0){ alert("Select items to order."); return; } if(!paymentMethod){ alert("Select payment method."); return; } document.getElementById("ackButtons").style.display="block"; showAckMessage("Orders Submitted ✅","#0073e6"); }
 function ackPayment(){ showAckMessage("Payment Received ✅","#00b050"); }
 function ackPrepare(){ currentOrders.forEach(o=>{o.status="Preparing"; o.timePreparing=new Date();}); updateOrderList(); showAckMessage("Order in Preparation 🔶","#ff9900"); }
-
-// ===== ACK MESSAGE =====
 function showAckMessage(msg,bg="#00b050"){ const d=document.createElement("div"); d.innerText=msg; Object.assign(d.style,{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",background:bg,color:"#fff",padding:"20px 30px",borderRadius:"10px",fontSize:"18px",fontWeight:"bold",boxShadow:"0 4px 12px rgba(0,0,0,0.4)",zIndex:9999,textAlign:"center"}); document.body.appendChild(d); setTimeout(()=>{d.remove()},2000); }
 
 // ===== Admin Panel =====
-function scrollToAdmin(){ const adminPanel=document.getElementById("adminPanel"); adminPanel.scrollIntoView({behavior:"smooth"}); adminPanel.style.display="block"; }
+function toggleAdmin(){ const p=document.getElementById("adminPanel"); p.style.display=p.style.display==="block"?"none":"block"; }
 function unlockAdmin(){ let pass=document.getElementById("adminPass").value; if(pass==="burgrix123"){ document.getElementById("adminContent").style.display="block"; } else{ alert("Incorrect password"); } }
 function addNewMenu(){ const name=document.getElementById("newMenuName").value.trim(); const price=parseFloat(document.getElementById("newMenuPrice").value); const stock=parseInt(document.getElementById("newMenuStock").value); if(!name||isNaN(price)||isNaN(stock)){ alert("Fill all fields correctly"); return; } menu.push({name,price,stock}); document.getElementById("newMenuName").value=""; document.getElementById("newMenuPrice").value=""; document.getElementById("newMenuStock").value=""; renderMenu(); }
-function addNewExtra(){ const name=document.getElementById("newExtraName").value
+function addNewExtra(){ const name=document.getElementById("newExtraName").value.trim(); const price=parseFloat(document.getElementById("newExtraPrice").value); const stock=parseInt(document.getElementById("newExtraStock").value); if(!name||isNaN(price)||isNaN(stock)){ alert("Fill all fields correctly"); return; } extras.push({name,price,stock}); document.getElementById("newExtraName").value=""; document.getElementById("newExtraPrice").value=""; document.getElementById("newExtraStock").value=""; renderExtras(); }
+function renderEditMenu(){ const div=document.getElementById("editMenuList"); div.innerHTML=""; menu.forEach(m=>{ const d=document.createElement("div"); d.innerText=`${m.name} – RM${m.price.toFixed(2)} (Stock:${m.stock})`; div.appendChild(d); }); }
+function renderEditExtras(){ const div=document.getElementById("editExtraList"); div.innerHTML=""; extras.forEach(e=>{ const d=document.createElement("div"); d.innerText=`${e.name} –
