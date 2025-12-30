@@ -3,12 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BURGRIX POS – Mobile Friendly</title>
+<title>BURGRIX POS</title>
 <style>
-body { font-family: Arial,sans-serif; margin:0; padding:10px; background:#fff7f2; }
-h1,h3{text-align:center;margin-bottom:10px;}
-.section{display:none;margin-bottom:15px;}
-.section.active{display:block;}
+body{font-family:Arial,sans-serif;margin:0;padding:10px;background:#fff7f2;}
+h1,h3{text-align:center;margin:5px;}
 button{padding:10px;margin:3px;font-size:14px;border:none;border-radius:8px;color:#fff;cursor:pointer;}
 .item-btn{background:#ff6a00;}
 .extra-btn{background:#6a5acd;}
@@ -27,7 +25,6 @@ button{padding:10px;margin:3px;font-size:14px;border:none;border-radius:8px;colo
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;}
 .modal-content{background:#fff;padding:15px;border-radius:10px;width:90%;max-width:400px;}
 .close-modal{float:right;font-size:20px;cursor:pointer;}
-.nav-btn{background:#555;margin:5px;padding:10px;border-radius:6px;color:#fff;font-size:16px;cursor:pointer;}
 .admin-panel{display:none;background:#f0f0f0;padding:10px;border-radius:8px;margin-top:10px;}
 .admin-input{margin-bottom:5px;width:100%;padding:5px;font-size:14px;}
 </style>
@@ -36,48 +33,36 @@ button{padding:10px;margin:3px;font-size:14px;border:none;border-radius:8px;colo
 
 <h1>🍔 BURGRIX POS</h1>
 
-<!-- NAVIGATION -->
-<div style="text-align:center;margin-bottom:10px;">
-  <button class="nav-btn" onclick="showSection(1)">1. Menu</button>
-  <button class="nav-btn" onclick="showSection(2)">2. Quantity & Payment</button>
-  <button class="nav-btn" onclick="showSection(3)">3. Orders</button>
-</div>
+<!-- MENU -->
+<h3>Select Burger / Item</h3>
+<div id="menuItems"></div>
 
-<!-- SECTION 1: MENU & ADD-ONS -->
-<div id="section1" class="section active">
-  <h3>Select Burger / Item</h3>
-  <div id="menuItems"></div>
-  <h3>Add-ons (Optional)</h3>
-  <div id="extraItems"></div>
-</div>
+<h3>Add-ons (Optional)</h3>
+<div id="extraItems"></div>
 
-<!-- SECTION 2: QUANTITY & PAYMENT -->
-<div id="section2" class="section">
-  <h3>Quantity (1–20)</h3>
-  <div id="qtyButtons"></div>
-  <h3>Payment Method</h3>
-  <button class="payment-btn" onclick="setPayment('Cash', this)">Cash</button>
-  <button class="payment-btn" onclick="setPayment('QR – Maybank', this)">QR – Maybank</button>
-  <button class="payment-btn" onclick="setPayment('QR – TnG', this)">QR – Touch n Go</button>
-  <button class="payment-btn" onclick="setPayment('PH – PowerHouzz', this)">PH – PowerHouzz</button>
-</div>
+<h3>Quantity (1–20)</h3>
+<div id="qtyButtons"></div>
 
-<!-- SECTION 3: ORDERS & ACKNOWLEDGMENT -->
-<div id="section3" class="section">
-  <h3>Current Orders</h3>
-  <div id="orderList"></div>
-  <div class="total" id="grandTotal">Total: RM 0.00</div>
-  <button class="submit-btn" onclick="submitOrders()">SUBMIT ORDER</button>
+<h3>Payment Method</h3>
+<button class="payment-btn" onclick="setPayment('Cash', this)">Cash</button>
+<button class="payment-btn" onclick="setPayment('QR – Maybank', this)">QR – Maybank</button>
+<button class="payment-btn" onclick="setPayment('QR – TnG', this)">QR – Touch n Go</button>
+<button class="payment-btn" onclick="setPayment('PH – PowerHouzz', this)">PH – PowerHouzz</button>
 
-  <div id="ackButtons" style="display:none;text-align:center;margin-top:10px;">
+<!-- ORDER ACTIONS -->
+<div class="total" id="grandTotal">Total: RM 0.00</div>
+<button class="submit-btn" onclick="addToOrder()">ADD TO ORDER</button>
+<button class="submit-btn" onclick="submitOrders()">SUBMIT ORDER</button>
+<div id="ackButtons" style="display:none;text-align:center;margin-top:10px;">
     <button class="submit-btn" style="background:#00b050;" onclick="ackPayment()">Payment Received</button>
     <button class="submit-btn" style="background:#ff9900;" onclick="ackPrepare()">Proceed to Prepare Orders</button>
-  </div>
-
-  <button class="submit-btn" id="orderDoneBtn" style="display:none;background:#28a745;" onclick="markOrderDone()">Order Done</button>
-  <button class="submit-btn reset-btn" onclick="resetOrder()">RESET ORDER</button>
-  <button class="submit-btn undo-btn" onclick="undoLast()">UNDO LAST</button>
 </div>
+<button class="submit-btn reset-btn" onclick="resetOrder()">RESET ORDER</button>
+<button class="submit-btn undo-btn" onclick="undoLast()">UNDO LAST</button>
+
+<!-- LAST ORDERS -->
+<h3>Last Orders</h3>
+<div id="orderList"></div>
 
 <!-- MODAL FOR ORDER DETAILS -->
 <div id="orderModal" class="modal">
@@ -97,7 +82,6 @@ button{padding:10px;margin:3px;font-size:14px;border:none;border-radius:8px;colo
   <label>Price (RM):</label><input class="admin-input" id="newMenuPrice" type="number" step="0.01" placeholder="Price">
   <label>Stock:</label><input class="admin-input" id="newMenuStock" type="number" placeholder="Stock">
   <button class="submit-btn" style="background:#28a745;" onclick="addNewMenu()">Add New Menu</button>
-
   <h4>Existing Main Menu:</h4><div id="editMenuList"></div>
 
   <h3>Add-ons Name:</h3>
@@ -111,15 +95,9 @@ button{padding:10px;margin:3px;font-size:14px;border:none;border-radius:8px;colo
 
 <script>
 // ===== STATE =====
-let menu=[{name:"Chicken Burger",price:13.9,stock:50},{name:"Mutton Burger",price:17.9,stock:20}];
+let menu=[{name:"Chicken Burger",price:13.9,stock:50},{name:"Mutton Burger",price:16.0,stock:20}];
 let extras=[{name:"Cheese Slice",price:2.0,stock:100},{name:"Extra Patty",price:5.0,stock:50}];
 let selectedItem=null,selectedExtras=[],quantity=1,paymentMethod="",currentOrders=[],lastAdded=null;
-
-// ===== NAVIGATION =====
-function showSection(n){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById(`section${n}`).classList.add('active');
-}
 
 // ===== MENU / EXTRAS =====
 function renderMenu(){
@@ -172,9 +150,6 @@ function setPayment(p,btn){ if(paymentMethod===p){paymentMethod=""; btn.classLis
 // ===== ADD TO ORDER =====
 function addToOrder(){
   if(!selectedItem){ alert("Select a burger."); return; }
-  if(quantity>selectedItem.stock){ alert("Not enough stock!"); return; }
-  for(const e of selectedExtras){ if(quantity>e.stock){ alert(`Not enough stock for ${e.name}`); return; } }
-
   let nameLine=selectedItem.name; if(selectedExtras.length>0) nameLine+=" + "+selectedExtras.map(e=>e.name).join(", ");
   let subtotal=parseFloat((selectedItem.price*quantity + selectedExtras.reduce((a,b)=>a+b.price*quantity,0)).toFixed(2));
   let orderObj={ name:nameLine, qty:quantity, price:subtotal, status:"Pending", mainItem:selectedItem.name, extras:[...selectedExtras], timeOrdered:new Date(), timePreparing:null, timeCompleted:null };
@@ -201,34 +176,40 @@ function updateOrderList(){
 // ===== MODAL =====
 function openModal(order){
   document.getElementById("modalContent").innerHTML=`
-    <p><strong>${order.name}</strong></p>
+    <p><strong>${order.mainItem}</strong></p>
+    ${order.extras.length>0 ? `<p>Add-ons: ${order.extras.map(e=>e.name).join(", ")}</p>` : ""}
     <p>Qty: ${order.qty}</p>
     <p>Subtotal: RM ${order.price.toFixed(2)}</p>
     <p>Status: ${order.status}</p>
     <p>Time Ordered: ${formatDate(order.timeOrdered)}</p>
-    <p>Time Preparing: ${order.timePreparing?formatDate(order.timePreparing):'-'}</p>
-    <p>Time Completed: ${order.timeCompleted?formatDate(order.timeCompleted):'-'}</p>
+    <p>Time Preparing: ${order.timePreparing ? formatDate(order.timePreparing) : '-'}</p>
+    <p>Time Completed: ${order.timeCompleted ? formatDate(order.timeCompleted) : '-'}</p>
+    <button onclick="markPreparing(${currentOrders.indexOf(order)})">Mark Preparing</button>
+    <button onclick="markCompleted(${currentOrders.indexOf(order)})">Mark Completed</button>
     <button onclick="deleteOrderModal()">Delete Order</button>`;
   document.getElementById("orderModal").style.display="flex";
   modalOrder = order;
 }
 function closeModal(){ document.getElementById("orderModal").style.display="none"; modalOrder=null; }
-let modalOrder=null;
 function deleteOrderModal(){ if(modalOrder){ deleteOrder(currentOrders.indexOf(modalOrder)); closeModal(); } }
+
+// ===== MARK INDIVIDUAL ORDER =====
+function markPreparing(index){ currentOrders[index].status="Preparing"; currentOrders[index].timePreparing=new Date(); updateOrderList(); openModal(currentOrders[index]); }
+function markCompleted(index){ currentOrders[index].status="Completed"; currentOrders[index].timeCompleted=new Date(); updateOrderList(); openModal(currentOrders[index]); }
 
 // ===== DATE FORMAT =====
 function formatDate(d){ if(!d) return ''; return `${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`; }
 
 // ===== DELETE, RESET, UNDO =====
 function deleteOrder(index){ currentOrders.splice(index,1); updateOrderList(); renderMenu(); renderExtras(); }
-function resetOrder(){ currentOrders=[]; lastAdded=null; selectedItem=null; selectedExtras=[]; quantity=1; paymentMethod=""; document.querySelectorAll('.item-btn,.extra-btn,.qty-btn,.payment-btn').forEach(b=>b.classList.remove('active')); updateOrderList(); updateSubtotalDisplay(); renderMenu(); renderExtras(); document.getElementById("ackButtons").style.display="none"; document.getElementById("orderDoneBtn").style.display="none"; }
+function resetOrder(){ currentOrders=[]; lastAdded=null; selectedItem=null; selectedExtras=[]; quantity=1; paymentMethod=""; document.querySelectorAll('.item-btn,.extra-btn,.qty-btn,.payment-btn').forEach(b=>b.classList.remove('active')); updateOrderList(); updateSubtotalDisplay(); renderMenu(); renderExtras(); document.getElementById("ackButtons").style.display="none"; }
 function undoLast(){ if(!lastAdded){ alert("Nothing to undo."); return; } deleteOrder(currentOrders.indexOf(lastAdded)); lastAdded=null; }
 
 // ===== ACK =====
 function submitOrders(){ if(currentOrders.length===0){ alert("Select items to order."); return; } if(!paymentMethod){ alert("Select payment method."); return; } document.getElementById("ackButtons").style.display="block"; showAckMessage("Orders Submitted ✅","#0073e6"); }
 function ackPayment(){ showAckMessage("Payment Received ✅","#00b050"); }
-function ackPrepare(){ currentOrders.forEach(o=>{o.status="Preparing"; o.timePreparing=new Date();}); updateOrderList(); showAckMessage("Order in Preparation 🔶","#ff9900"); document.getElementById("orderDoneBtn").style.display="block"; }
-function markOrderDone(){ currentOrders.forEach(o=>{o.status="Completed"; o.timeCompleted=new Date();}); updateOrderList(); showAckMessage("Order Completed ✅","#28a745"); document.getElementById("orderDoneBtn").style.display="none"; }
+function ackPrepare(){ currentOrders.forEach(o=>{o.status="Preparing"; o.timePreparing=new Date();}); updateOrderList(); showAckMessage("Order in Preparation 🔶","#ff9900"); }
+function markOrderDone(){ currentOrders.forEach(o=>{o.status="Completed"; o.timeCompleted=new Date();}); updateOrderList(); showAckMessage("Order Completed ✅","#28a745"); }
 
 // ===== ACK MESSAGE =====
 function showAckMessage(msg,bg="#00b050"){ const d=document.createElement("div"); d.innerText=msg; Object.assign(d.style,{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",background:bg,color:"#fff",padding:"20px 30px",borderRadius:"10px",fontSize:"18px",fontWeight:"bold",boxShadow:"0 4px 12px rgba(0,0,0,0.4)",zIndex:9999,textAlign:"center"}); document.body.appendChild(d); setTimeout(()=>{d.remove()},2000); }
@@ -241,7 +222,7 @@ function renderEditMenu(){ const div=document.getElementById("editMenuList"); di
 function renderEditExtras(){ const div=document.getElementById("editExtraList"); div.innerHTML=""; extras.forEach(e=>{ const d=document.createElement("div"); d.innerText=`${e.name} – RM${e.price.toFixed(2)} (Stock:${e.stock})`; div.appendChild(d); }); }
 
 // ===== INIT =====
-window.onload=()=>{ renderMenu(); renderExtras(); updateSubtotalDisplay(); showSection(1); };
+window.onload=()=>{ renderMenu(); renderExtras(); updateSubtotalDisplay(); };
 </script>
 
 </body>
