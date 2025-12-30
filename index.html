@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BURGRIX POS</title>
+<title>BURGRIX POS – Auto Total</title>
 <style>
 body {
   font-family: Arial, sans-serif;
@@ -11,114 +11,148 @@ body {
   margin: 0;
   padding: 15px;
 }
-h1 {
-  text-align: center;
-  margin-bottom: 10px;
-}
-.section {
-  margin-bottom: 15px;
-}
+h1 { text-align: center; margin-bottom: 10px; }
+.section { margin-bottom: 15px; }
 button {
-  width: 100%;
-  padding: 14px;
-  margin: 5px 0;
+  padding: 12px;
+  margin: 3px;
   font-size: 16px;
   border: none;
   border-radius: 10px;
-}
-.menu button { background: #ff6a00; color: #fff; }
-.payment button { background: #444; color: #fff; }
-.active { outline: 3px solid #00b050; }
-.submit {
-  background: #00b050;
   color: #fff;
+}
+.item-btn { background: #ff6a00; }
+.qty-btn { background: #444; }
+.payment-btn { background: #00b050; }
+.active { outline: 3px solid #000; background-color: #ffa500; }
+.submit-btn {
+  width: 100%;
+  padding: 15px;
   font-size: 18px;
+  border-radius: 10px;
+  background: #0073e6;
+  color: #fff;
 }
 .total {
   font-size: 20px;
-  text-align: center;
   font-weight: bold;
+  text-align: center;
+  margin-bottom: 10px;
 }
 </style>
 </head>
-
 <body>
 
 <h1>🍔 BURGRIX POS</h1>
 
-<div class="section menu">
+<div class="section">
   <h3>Select Item</h3>
-  <button onclick="selectItem('Chicken Burger',13.9)">Chicken Burger – RM13.90</button>
-  <button onclick="selectItem('Mutton Burger',17.9)">Mutton Burger – RM17.90</button>
-  <button onclick="selectItem('Fish Burger',15.9)">Fish Burger – RM15.90</button>
-  <button onclick="selectItem('Crispy Tandoori Burger',16.9)">Tandoori Burger – RM16.90</button>
-  <button onclick="selectItem('Grilled Chicken Chop',15.9)">Chicken Chop – RM15.90</button>
-  <button onclick="selectItem('Fish & Chips',16.9)">Fish & Chips – RM16.90</button>
+  <div id="menuItems">
+    <!-- Buttons will be added by JS -->
+  </div>
 </div>
 
 <div class="section">
   <h3>Quantity</h3>
-  <input type="number" id="qty" value="1" min="1" style="width:100%;padding:12px;font-size:16px;">
-</div>
-
-<div class="section payment">
-  <h3>Payment</h3>
-  <button onclick="selectPayment('Cash')">Cash</button>
-  <button onclick="selectPayment('QR – Maybank')">QR – Maybank</button>
-  <button onclick="selectPayment('QR – Touch n Go')">QR – Touch n Go</button>
-  <button onclick="selectPayment('PH – PowerHouzz')">PH – PowerHouzz</button>
+  <div id="qtyButtons">
+    <button class="qty-btn" onclick="setQty(1)">1</button>
+    <button class="qty-btn" onclick="setQty(2)">2</button>
+    <button class="qty-btn" onclick="setQty(3)">3</button>
+    <button class="qty-btn" onclick="setQty(4)">4</button>
+    <button class="qty-btn" onclick="setQty(5)">5</button>
+    <button class="qty-btn" onclick="setQty(6)">6</button>
+  </div>
 </div>
 
 <div class="total" id="total">Total: RM 0.00</div>
 
-<button class="submit" onclick="submitOrder()">SUBMIT ORDER</button>
+<div class="section">
+  <h3>Payment Method</h3>
+  <button class="payment-btn" onclick="setPayment('Cash', this)">Cash</button>
+  <button class="payment-btn" onclick="setPayment('QR – Maybank', this)">QR – Maybank</button>
+  <button class="payment-btn" onclick="setPayment('QR – Touch n Go', this)">QR – Touch n Go</button>
+  <button class="payment-btn" onclick="setPayment('PH – PowerHouzz', this)">PH – PowerHouzz</button>
+</div>
+
+<button class="submit-btn" onclick="submitOrder()">SUBMIT ORDER</button>
 
 <script>
-let selectedItem = "";
-let price = 0;
-let payment = "";
+// MENU DATA
+const menu = [
+  {name: "Chicken Burger", price: 13.9},
+  {name: "Mutton Burger", price: 17.9},
+  {name: "Fish Burger", price: 15.9},
+  {name: "Crispy Tandoori Burger", price: 16.9},
+  {name: "Grilled Chicken Chop", price: 15.9},
+  {name: "Fish & Chips", price: 16.9}
+];
 
-function selectItem(item, p) {
-  selectedItem = item;
-  price = p;
+let selectedItem = null;
+let quantity = 1;
+let paymentMethod = "";
+
+// Generate item buttons
+const menuDiv = document.getElementById("menuItems");
+menu.forEach((item, index) => {
+  const btn = document.createElement("button");
+  btn.classList.add("item-btn");
+  btn.innerText = `${item.name} – RM${item.price.toFixed(2)}`;
+  btn.onclick = () => selectItem(index, btn);
+  menuDiv.appendChild(btn);
+});
+
+// Item selection
+function selectItem(index, btn) {
+  selectedItem = menu[index];
+  // Highlight selected
+  document.querySelectorAll('.item-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
   updateTotal();
 }
 
-function selectPayment(p) {
-  payment = p;
+// Quantity selection
+function setQty(q) {
+  quantity = q;
+  updateTotal();
 }
 
+// Payment selection
+function setPayment(p, btn) {
+  paymentMethod = p;
+  document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Update total
 function updateTotal() {
-  let qty = document.getElementById("qty").value;
-  document.getElementById("total").innerText =
-    "Total: RM " + (qty * price).toFixed(2);
+  if (!selectedItem) return;
+  const total = selectedItem.price * quantity;
+  document.getElementById("total").innerText = `Total: RM ${total.toFixed(2)}`;
 }
 
-document.getElementById("qty").addEventListener("input", updateTotal);
-
+// Submit order
 function submitOrder() {
-  if (!selectedItem || !payment) {
-    alert("Please select item and payment");
+  if (!selectedItem || !paymentMethod) {
+    alert("Please select item and payment method");
     return;
   }
-
-  let qty = document.getElementById("qty").value;
-  let total = (qty * price).toFixed(2);
-
-  let order = {
+  const order = {
     time: new Date().toLocaleTimeString(),
-    item: selectedItem,
-    qty: qty,
-    total: total,
-    payment: payment
+    item: selectedItem.name,
+    qty: quantity,
+    total: (selectedItem.price * quantity).toFixed(2),
+    payment: paymentMethod
   };
-
   let orders = JSON.parse(localStorage.getItem("burgrix_orders")) || [];
   orders.push(order);
   localStorage.setItem("burgrix_orders", JSON.stringify(orders));
-
   alert("Order Saved ✅");
-  location.reload();
+  // Reset selections
+  selectedItem = null;
+  quantity = 1;
+  paymentMethod = "";
+  document.querySelectorAll('.item-btn, .payment-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById("total").innerText = "Total: RM 0.00";
 }
 </script>
 
