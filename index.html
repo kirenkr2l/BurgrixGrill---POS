@@ -243,4 +243,11 @@ function unlockAdmin(){ let pass=document.getElementById("adminPass").value; if(
 function addNewMenu(){ const name=document.getElementById("newMenuName").value.trim(); const price=parseFloat(document.getElementById("newMenuPrice").value); const stock=parseInt(document.getElementById("newMenuStock").value); if(!name||isNaN(price)||isNaN(stock)){ alert("Fill all fields correctly"); return; } menu.push({name,price,stock}); document.getElementById("newMenuName").value=""; document.getElementById("newMenuPrice").value=""; document.getElementById("newMenuStock").value=""; renderMenu(); }
 function addNewExtra(){ const name=document.getElementById("newExtraName").value.trim(); const price=parseFloat(document.getElementById("newExtraPrice").value); const stock=parseInt(document.getElementById("newExtraStock").value); if(!name||isNaN(price)||isNaN(stock)){ alert("Fill all fields correctly"); return; } extras.push({name,price,stock}); document.getElementById("newExtraName").value=""; document.getElementById("newExtraPrice").value=""; document.getElementById("newExtraStock").value=""; renderExtras(); }
 function renderEditMenu(){ const div=document.getElementById("editMenuList"); div.innerHTML=""; menu.forEach(m=>{ const d=document.createElement("div"); d.innerText=`${m.name} – RM${m.price.toFixed(2)} (Stock:${m.stock})`; div.appendChild(d); }); }
-function renderEditExtras(){ const div=document.getElementById("editExtraList"); div.innerHTML=""; extras.forEach(e=>{ const d=document.createElement("div"); d.innerText=`${e.name} –
+function renderEditExtras(){ const div=document.getElementById("editExtraList"); div.innerHTML=""; extras.forEach(e=>{ const d=document.createElement("div"); d.innerText=`${e.name} – RM${e.price.toFixed(2)} (Stock:${e.stock})`; div.appendChild(d); }); }
+
+// ===== Initial Rendering =====
+renderMenu(); renderExtras();
+</script>
+
+</body>
+</html>
