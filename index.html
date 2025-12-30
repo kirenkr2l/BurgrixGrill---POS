@@ -3,42 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BURGRIX POS – Auto Total</title>
+<title>BURGRIX POS – Full POS</title>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #fff7f2;
-  margin: 0;
-  padding: 15px;
-}
+body { font-family: Arial, sans-serif; background: #fff7f2; margin: 0; padding: 15px; }
 h1 { text-align: center; margin-bottom: 10px; }
 .section { margin-bottom: 15px; }
-button {
-  padding: 12px;
-  margin: 3px;
-  font-size: 16px;
-  border: none;
-  border-radius: 10px;
-  color: #fff;
-}
+button { padding: 10px; margin: 3px; font-size: 14px; border: none; border-radius: 8px; color: #fff; }
 .item-btn { background: #ff6a00; }
 .qty-btn { background: #444; }
 .payment-btn { background: #00b050; }
 .active { outline: 3px solid #000; background-color: #ffa500; }
-.submit-btn {
-  width: 100%;
-  padding: 15px;
-  font-size: 18px;
-  border-radius: 10px;
-  background: #0073e6;
-  color: #fff;
-}
-.total {
-  font-size: 20px;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 10px;
-}
+.submit-btn { width: 100%; padding: 15px; font-size: 18px; border-radius: 10px; background: #0073e6; color: #fff; margin-top:10px; }
+.total, .order-summary { font-size: 18px; font-weight: bold; margin-top:10px; }
+.order-item { display: flex; justify-content: space-between; align-items: center; margin-bottom:5px; padding:5px; background:#ffe0c4; border-radius:6px; }
+.order-item span { flex:1; }
+.delete-btn { background:red; color:#fff; border-radius:6px; padding:4px 6px; font-size:12px; }
+.ack-btn { background:#0073e6; margin:5px; }
 </style>
 </head>
 <body>
@@ -47,24 +27,13 @@ button {
 
 <div class="section">
   <h3>Select Item</h3>
-  <div id="menuItems">
-    <!-- Buttons will be added by JS -->
-  </div>
+  <div id="menuItems"></div>
 </div>
 
 <div class="section">
   <h3>Quantity</h3>
-  <div id="qtyButtons">
-    <button class="qty-btn" onclick="setQty(1)">1</button>
-    <button class="qty-btn" onclick="setQty(2)">2</button>
-    <button class="qty-btn" onclick="setQty(3)">3</button>
-    <button class="qty-btn" onclick="setQty(4)">4</button>
-    <button class="qty-btn" onclick="setQty(5)">5</button>
-    <button class="qty-btn" onclick="setQty(6)">6</button>
-  </div>
+  <div id="qtyButtons"></div>
 </div>
-
-<div class="total" id="total">Total: RM 0.00</div>
 
 <div class="section">
   <h3>Payment Method</h3>
@@ -74,86 +43,124 @@ button {
   <button class="payment-btn" onclick="setPayment('PH – PowerHouzz', this)">PH – PowerHouzz</button>
 </div>
 
-<button class="submit-btn" onclick="submitOrder()">SUBMIT ORDER</button>
+<div class="section order-summary" id="orderSummary">
+  <h3>Current Order</h3>
+  <div id="orderList"></div>
+  <div class="total" id="grandTotal">Total: RM 0.00</div>
+</div>
+
+<button class="submit-btn" onclick="submitOrders()">SUBMIT ORDER</button>
 
 <script>
-// MENU DATA
+// Menu items
 const menu = [
-  {name: "Chicken Burger", price: 13.9},
-  {name: "Mutton Burger", price: 17.9},
-  {name: "Fish Burger", price: 15.9},
-  {name: "Crispy Tandoori Burger", price: 16.9},
-  {name: "Grilled Chicken Chop", price: 15.9},
-  {name: "Fish & Chips", price: 16.9}
+  {name:"Chicken Burger", price:13.9},
+  {name:"Mutton Burger", price:17.9},
+  {name:"Fish Burger", price:15.9},
+  {name:"Crispy Tandoori Burger", price:16.9},
+  {name:"Grilled Chicken Chop", price:15.9},
+  {name:"Fish & Chips", price:16.9}
 ];
 
 let selectedItem = null;
 let quantity = 1;
 let paymentMethod = "";
+let currentOrders = [];
 
-// Generate item buttons
+// Create menu buttons
 const menuDiv = document.getElementById("menuItems");
-menu.forEach((item, index) => {
+menu.forEach((item,index)=>{
   const btn = document.createElement("button");
   btn.classList.add("item-btn");
   btn.innerText = `${item.name} – RM${item.price.toFixed(2)}`;
-  btn.onclick = () => selectItem(index, btn);
+  btn.onclick = ()=>{
+    selectedItem = {...item};
+    document.querySelectorAll('.item-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  };
   menuDiv.appendChild(btn);
 });
 
-// Item selection
-function selectItem(index, btn) {
-  selectedItem = menu[index];
-  // Highlight selected
-  document.querySelectorAll('.item-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  updateTotal();
-}
-
-// Quantity selection
-function setQty(q) {
-  quantity = q;
-  updateTotal();
+// Quantity buttons 1-20
+const qtyDiv = document.getElementById("qtyButtons");
+for(let i=1;i<=20;i++){
+  const btn = document.createElement("button");
+  btn.classList.add("qty-btn");
+  btn.innerText=i;
+  btn.onclick=()=>{
+    quantity=i;
+    document.querySelectorAll('.qty-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  };
+  qtyDiv.appendChild(btn);
 }
 
 // Payment selection
-function setPayment(p, btn) {
-  paymentMethod = p;
-  document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('active'));
+function setPayment(p,btn){
+  paymentMethod=p;
+  document.querySelectorAll('.payment-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
 
-// Update total
-function updateTotal() {
-  if (!selectedItem) return;
-  const total = selectedItem.price * quantity;
-  document.getElementById("total").innerText = `Total: RM ${total.toFixed(2)}`;
+// Add current selection to order list
+function addToOrder(){
+  if(!selectedItem || !quantity){ alert("Select item and quantity"); return;}
+  // Check if item already in order
+  const existing=currentOrders.find(o=>o.name===selectedItem.name);
+  if(existing){ existing.qty+=quantity; existing.subtotal=existing.qty*existing.price;}
+  else{ currentOrders.push({name:selectedItem.name, qty:quantity, price:selectedItem.price, subtotal:selectedItem.price*quantity});}
+  updateOrderList();
 }
 
-// Submit order
-function submitOrder() {
-  if (!selectedItem || !paymentMethod) {
-    alert("Please select item and payment method");
-    return;
-  }
-  const order = {
-    time: new Date().toLocaleTimeString(),
-    item: selectedItem.name,
-    qty: quantity,
-    total: (selectedItem.price * quantity).toFixed(2),
-    payment: paymentMethod
-  };
-  let orders = JSON.parse(localStorage.getItem("burgrix_orders")) || [];
-  orders.push(order);
-  localStorage.setItem("burgrix_orders", JSON.stringify(orders));
-  alert("Order Saved ✅");
-  // Reset selections
-  selectedItem = null;
-  quantity = 1;
-  paymentMethod = "";
-  document.querySelectorAll('.item-btn, .payment-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById("total").innerText = "Total: RM 0.00";
+// Update order summary display
+function updateOrderList(){
+  const listDiv=document.getElementById("orderList");
+  listDiv.innerHTML="";
+  let total=0;
+  currentOrders.forEach((o,index)=>{
+    total+=o.subtotal;
+    const div=document.createElement("div");
+    div.classList.add("order-item");
+    div.innerHTML=`<span>${o.name} x ${o.qty} – RM ${o.subtotal.toFixed(2)}</span>
+      <button class="delete-btn" onclick="deleteOrder(${index})">Delete</button>`;
+    listDiv.appendChild(div);
+  });
+  document.getElementById("grandTotal").innerText=`Total: RM ${total.toFixed(2)}`;
 }
+
+// Delete item
+function deleteOrder(index){
+  currentOrders.splice(index,1);
+  updateOrderList();
+}
+
+// Submit orders
+function submitOrders(){
+  if(currentOrders.length===0 || !paymentMethod){ alert("Select items and payment"); return;}
+  localStorage.setItem("burgrix_orders",JSON.stringify(currentOrders));
+  alert("✅ Orders Received!");
+  showAckButtons();
+}
+
+// Show acknowledgment buttons
+function showAckButtons(){
+  const ackDiv=document.createElement("div");
+  ackDiv.style.marginTop="10px";
+  ackDiv.innerHTML=`
+    <button class="ack-btn" onclick="ackPayment()">Payment Received</button>
+    <button class="ack-btn" onclick="ackPrepare()">Proceed to Prepare Orders</button>
+  `;
+  document.body.appendChild(ackDiv);
+}
+
+// Ack functions
+function ackPayment(){ alert("Payment Received ✅"); }
+function ackPrepare(){ alert("Order is now in preparation ✅"); }
+
+// Automatically add current selection to order when changing quantity or item
+document.querySelectorAll('.qty-btn').forEach(btn=>btn.addEventListener('click', addToOrder));
+document.querySelectorAll('.item-btn').forEach(btn=>btn.addEventListener('click', addToOrder));
+
 </script>
 
 </body>
