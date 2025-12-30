@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BURGRIX POS – Professional</title>
+<title>BURGRIX POS – Mobile Friendly</title>
 <style>
-body { font-family: Arial, sans-serif; background:#fff7f2; margin:0; padding:15px; }
-h1, h3{text-align:center;margin-bottom:10px;}
-.section{margin-bottom:15px;}
+body { font-family: Arial,sans-serif; margin:0; padding:10px; background:#fff7f2; }
+h1,h3{text-align:center;margin-bottom:10px;}
+.section{display:none;margin-bottom:15px;}
+.section.active{display:block;}
 button{padding:10px;margin:3px;font-size:14px;border:none;border-radius:8px;color:#fff;cursor:pointer;}
 .item-btn{background:#ff6a00;}
 .extra-btn{background:#6a5acd;}
@@ -18,64 +19,42 @@ button{padding:10px;margin:3px;font-size:14px;border:none;border-radius:8px;colo
 .reset-btn{background:#ff4d4d;}
 .undo-btn{background:#ffa500;}
 .total,.order-summary{font-size:18px;font-weight:bold;margin-top:10px;}
-.order-item{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;padding:5px;background:#ffe0c4;border-radius:6px;}
-.order-item span{flex:1;}
-.delete-btn{background:red;color:#fff;border-radius:6px;padding:4px 6px;font-size:12px;cursor:pointer;}
-.ack-btn{background:#0073e6;margin:5px;padding:10px;border-radius:6px;color:#fff;font-size:16px;width:48%;cursor:pointer;}
-.status-btn{background:#555;padding:4px 6px;margin-left:5px;font-size:12px;}
-.analytics{background:#f0f0f0;padding:10px;border-radius:8px;margin-top:10px;}
+.order-item{background:#ffe0c4;border-radius:6px;padding:10px;margin-bottom:5px;cursor:pointer;}
+.order-status{font-size:12px;padding:3px 6px;border-radius:4px;color:#fff;}
+.status-Pending{background:#ff9900;}
+.status-Preparing{background:#0073e6;}
+.status-Completed{background:#28a745;}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;}
+.modal-content{background:#fff;padding:15px;border-radius:10px;width:90%;max-width:400px;}
+.close-modal{float:right;font-size:20px;cursor:pointer;}
+.nav-btn{background:#555;margin:5px;padding:10px;border-radius:6px;color:#fff;font-size:16px;cursor:pointer;}
+.admin-panel{display:none;background:#f0f0f0;padding:10px;border-radius:8px;margin-top:10px;}
+.admin-input{margin-bottom:5px;width:100%;padding:5px;font-size:14px;}
 </style>
 </head>
 <body>
 
-<h1>🍔 BURGRIX POS – Professional</h1>
+<h1>🍔 BURGRIX POS</h1>
 
-<!-- MENU MANAGEMENT PANEL (JSON editable) -->
-<script>
-let menu = [
-  {name:"Chicken Burger", price:13.9, stock:50},
-  {name:"Mutton Burger", price:17.9, stock:20},
-  {name:"Fish Burger", price:15.9, stock:30},
-  {name:"Crispy Tandoori Burger", price:16.9, stock:15},
-  {name:"Grilled Chicken Chop", price:15.9, stock:25},
-  {name:"Fish & Chips", price:16.9, stock:20}
-];
+<!-- NAVIGATION -->
+<div style="text-align:center;margin-bottom:10px;">
+  <button class="nav-btn" onclick="showSection(1)">1. Menu</button>
+  <button class="nav-btn" onclick="showSection(2)">2. Quantity & Payment</button>
+  <button class="nav-btn" onclick="showSection(3)">3. Orders</button>
+</div>
 
-let extras = [
-  {name:"Cheese Slice", price:2.0, stock:100},
-  {name:"Extra Patty", price:5.0, stock:50},
-  {name:"Bacon", price:3.5, stock:40},
-  {name:"Sauce (Spicy/Mayo)", price:1.0, stock:200}
-];
-</script>
-
-<!-- MAIN MENU -->
-<div class="section">
+<!-- SECTION 1: MENU & ADD-ONS -->
+<div id="section1" class="section active">
   <h3>Select Burger / Item</h3>
   <div id="menuItems"></div>
-</div>
-
-<!-- QUANTITY -->
-<div class="section">
-  <h3>Quantity (1–20)</h3>
-  <div id="qtyButtons"></div>
-</div>
-
-<!-- ADD-ONS -->
-<div class="section">
   <h3>Add-ons (Optional)</h3>
   <div id="extraItems"></div>
 </div>
 
-<!-- ACTIONS -->
-<div class="section">
-  <button class="submit-btn" onclick="addToOrder()">ADD TO ORDER</button>
-  <button class="submit-btn reset-btn" onclick="resetOrder()">RESET ORDER</button>
-  <button class="submit-btn undo-btn" onclick="undoLast()">UNDO LAST</button>
-</div>
-
-<!-- PAYMENT -->
-<div class="section">
+<!-- SECTION 2: QUANTITY & PAYMENT -->
+<div id="section2" class="section">
+  <h3>Quantity (1–20)</h3>
+  <div id="qtyButtons"></div>
   <h3>Payment Method</h3>
   <button class="payment-btn" onclick="setPayment('Cash', this)">Cash</button>
   <button class="payment-btn" onclick="setPayment('QR – Maybank', this)">QR – Maybank</button>
@@ -83,116 +62,112 @@ let extras = [
   <button class="payment-btn" onclick="setPayment('PH – PowerHouzz', this)">PH – PowerHouzz</button>
 </div>
 
-<!-- ORDER SUMMARY -->
-<div class="section order-summary" id="orderSummary">
+<!-- SECTION 3: ORDERS & ACKNOWLEDGMENT -->
+<div id="section3" class="section">
   <h3>Current Orders</h3>
   <div id="orderList"></div>
   <div class="total" id="grandTotal">Total: RM 0.00</div>
+  <button class="submit-btn" onclick="submitOrders()">SUBMIT ORDER</button>
+
+  <div id="ackButtons" style="display:none;text-align:center;margin-top:10px;">
+    <button class="submit-btn" style="background:#00b050;" onclick="ackPayment()">Payment Received</button>
+    <button class="submit-btn" style="background:#ff9900;" onclick="ackPrepare()">Proceed to Prepare Orders</button>
+  </div>
+
+  <button class="submit-btn" id="orderDoneBtn" style="display:none;background:#28a745;" onclick="markOrderDone()">Order Done</button>
+  <button class="submit-btn reset-btn" onclick="resetOrder()">RESET ORDER</button>
+  <button class="submit-btn undo-btn" onclick="undoLast()">UNDO LAST</button>
 </div>
 
-<!-- SUBMIT ORDER -->
-<button class="submit-btn" onclick="submitOrders()">SUBMIT ORDER</button>
-
-<!-- ACKNOWLEDGMENT -->
-<div id="ackButtons" style="display:none;text-align:center;margin-top:10px;">
-  <button class="ack-btn" onclick="ackPayment()">Payment Received</button>
-  <button class="ack-btn" onclick="ackPrepare()">Proceed to Prepare Orders</button>
+<!-- MODAL FOR ORDER DETAILS -->
+<div id="orderModal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal" onclick="closeModal()">&times;</span>
+    <div id="modalContent"></div>
+  </div>
 </div>
 
-<!-- RECENT ORDERS -->
-<div class="section">
-  <h3>Last 5 Orders</h3>
-  <div id="recentOrders" style="background:#f0f0f0;padding:10px;border-radius:8px;min-height:50px;">No orders yet.</div>
-</div>
+<!-- HIDDEN ADMIN PANEL -->
+<div id="adminPanel" class="admin-panel">
+<h3>Admin Panel – Add Menu / Add-ons</h3>
+<label>Password:</label><input class="admin-input" type="password" id="adminPass" placeholder="Enter password">
+<button class="submit-btn" style="background:#0073e6;" onclick="unlockAdmin()">Unlock</button>
+<div id="adminContent" style="display:none;">
+  <label>Main Menu Name:</label><input class="admin-input" id="newMenuName" placeholder="Burger Name">
+  <label>Price (RM):</label><input class="admin-input" id="newMenuPrice" type="number" step="0.01" placeholder="Price">
+  <label>Stock:</label><input class="admin-input" id="newMenuStock" type="number" placeholder="Stock">
+  <button class="submit-btn" style="background:#28a745;" onclick="addNewMenu()">Add New Menu</button>
 
-<!-- ANALYTICS -->
-<div class="section analytics" id="analytics">
-<h3>Sales Analytics</h3>
-<div id="salesReport">No sales yet.</div>
+  <h4>Existing Main Menu:</h4><div id="editMenuList"></div>
+
+  <h3>Add-ons Name:</h3>
+  <input class="admin-input" id="newExtraName" placeholder="Add-on Name">
+  <label>Price (RM):</label><input class="admin-input" id="newExtraPrice" type="number" step="0.01" placeholder="Price">
+  <label>Stock:</label><input class="admin-input" id="newExtraStock" type="number" placeholder="Stock">
+  <button class="submit-btn" style="background:#28a745;" onclick="addNewExtra()">Add New Add-on</button>
+  <h4>Existing Add-ons:</h4><div id="editExtraList"></div>
+</div>
 </div>
 
 <script>
 // ===== STATE =====
-let selectedItem = null;
-let selectedExtras = [];
-let quantity = 1;
-let paymentMethod = "";
-let currentOrders = [];
-let lastAdded = null;
+let menu=[{name:"Chicken Burger",price:13.9,stock:50},{name:"Mutton Burger",price:17.9,stock:20}];
+let extras=[{name:"Cheese Slice",price:2.0,stock:100},{name:"Extra Patty",price:5.0,stock:50}];
+let selectedItem=null,selectedExtras=[],quantity=1,paymentMethod="",currentOrders=[],lastAdded=null;
 
-// ===== CREATE MENU =====
-const menuDiv = document.getElementById("menuItems");
-function renderMenu() {
-  menuDiv.innerHTML="";
-  menu.forEach((item,index)=>{
-    const btn=document.createElement("button");
-    btn.classList.add("item-btn");
-    btn.disabled = item.stock<=0;
-    btn.innerText=`${item.name} – RM${item.price.toFixed(2)} (Stock:${item.stock})`;
-    btn.addEventListener('click',()=>{
-      if(selectedItem && selectedItem.name===item.name){ selectedItem=null; btn.classList.remove('active'); selectedExtras=[]; document.querySelectorAll('.extra-btn').forEach(b=>b.classList.remove('active')); return; }
-      selectedItem={...item};
-      document.querySelectorAll('.item-btn').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedExtras=[];
-      document.querySelectorAll('.extra-btn').forEach(b=>b.classList.remove('active'));
-    });
-    menuDiv.appendChild(btn);
-  });
+// ===== NAVIGATION =====
+function showSection(n){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(`section${n}`).classList.add('active');
 }
-renderMenu();
 
-// ===== CREATE EXTRAS =====
-const extraDiv = document.getElementById("extraItems");
-function renderExtras() {
-  extraDiv.innerHTML="";
+// ===== MENU / EXTRAS =====
+function renderMenu(){
+  const div=document.getElementById("menuItems"); div.innerHTML="";
+  menu.forEach(item=>{
+    const btn=document.createElement("button");
+    btn.classList.add("item-btn"); btn.disabled=item.stock<=0;
+    btn.innerText=`${item.name} – RM${item.price.toFixed(2)} (Stock:${item.stock})`;
+    btn.onclick=()=>{
+      if(selectedItem && selectedItem.name===item.name){ selectedItem=null; btn.classList.remove('active'); selectedExtras=[]; document.querySelectorAll('.extra-btn').forEach(b=>b.classList.remove('active')); updateSubtotalDisplay(); return; }
+      selectedItem={...item}; document.querySelectorAll('.item-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); selectedExtras=[]; document.querySelectorAll('.extra-btn').forEach(b=>b.classList.remove('active')); updateSubtotalDisplay();
+    };
+    div.appendChild(btn);
+  });
+  renderEditMenu();
+}
+function renderExtras(){
+  const div=document.getElementById("extraItems"); div.innerHTML="";
   extras.forEach(item=>{
-    const btn=document.createElement("button");
-    btn.classList.add("extra-btn");
-    btn.disabled=item.stock<=0;
+    const btn=document.createElement("button"); btn.classList.add("extra-btn"); btn.disabled=item.stock<=0;
     btn.innerText=`${item.name} – RM${item.price.toFixed(2)} (Stock:${item.stock})`;
-    btn.addEventListener('click',()=>{
-      const index = selectedExtras.findIndex(e=>e.name===item.name);
-      if(index>-1){ selectedExtras.splice(index,1); btn.classList.remove('active'); } 
-      else { selectedExtras.push({...item}); btn.classList.add('active'); }
-    });
-    extraDiv.appendChild(btn);
+    btn.onclick=()=>{
+      const idx=selectedExtras.findIndex(e=>e.name===item.name);
+      if(idx>-1){ selectedExtras.splice(idx,1); btn.classList.remove('active'); } else{ selectedExtras.push({...item}); btn.classList.add('active'); }
+      updateSubtotalDisplay();
+    };
+    div.appendChild(btn);
   });
+  renderEditExtras();
 }
-renderExtras();
 
-// ===== QUANTITY BUTTONS =====
-const qtyDiv = document.getElementById("qtyButtons");
+// ===== QUANTITY =====
+const qtyDiv=document.getElementById("qtyButtons");
 for(let i=1;i<=20;i++){
-  const btn=document.createElement("button");
-  btn.classList.add("qty-btn");
-  btn.innerText=i;
-  btn.addEventListener('click',()=>{
-    quantity=i;
-    document.querySelectorAll('.qty-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    updateSubtotalDisplay();
-  });
+  const btn=document.createElement("button"); btn.classList.add("qty-btn"); btn.innerText=i;
+  btn.onclick=()=>{ quantity=i; document.querySelectorAll('.qty-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); updateSubtotalDisplay(); };
   qtyDiv.appendChild(btn);
 }
 
-// ===== SUBTOTAL DISPLAY =====
+// ===== SUBTOTAL =====
 function updateSubtotalDisplay(){
   let subtotal=0;
-  if(selectedItem){
-    subtotal += selectedItem.price*quantity;
-    selectedExtras.forEach(e=>subtotal+=e.price*quantity);
-  }
+  if(selectedItem){ subtotal+=selectedItem.price*quantity; selectedExtras.forEach(e=>subtotal+=e.price*quantity); }
   document.getElementById("grandTotal").innerText=`Subtotal: RM ${subtotal.toFixed(2)}`;
 }
 
 // ===== PAYMENT =====
-function setPayment(p,btn){
-  if(paymentMethod===p){paymentMethod=""; btn.classList.remove('active'); return;}
-  paymentMethod=p;
-  document.querySelectorAll('.payment-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-}
+function setPayment(p,btn){ if(paymentMethod===p){paymentMethod=""; btn.classList.remove('active'); return;} paymentMethod=p; document.querySelectorAll('.payment-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
 
 // ===== ADD TO ORDER =====
 function addToOrder(){
@@ -200,133 +175,73 @@ function addToOrder(){
   if(quantity>selectedItem.stock){ alert("Not enough stock!"); return; }
   for(const e of selectedExtras){ if(quantity>e.stock){ alert(`Not enough stock for ${e.name}`); return; } }
 
-  // combine name + add-ons
-  let nameLine = selectedItem.name;
-  if(selectedExtras.length>0) nameLine += " + " + selectedExtras.map(e=>e.name).join(", ");
-  let subtotal = parseFloat((selectedItem.price*quantity + selectedExtras.reduce((a,b)=>a+b.price*quantity,0)).toFixed(2));
-
-  let orderObj = {name:nameLine, qty:quantity, price:subtotal, status:"Pending", mainItem:selectedItem.name, extras:[...selectedExtras]};
-  currentOrders.push(orderObj);
-  lastAdded = orderObj;
-
+  let nameLine=selectedItem.name; if(selectedExtras.length>0) nameLine+=" + "+selectedExtras.map(e=>e.name).join(", ");
+  let subtotal=parseFloat((selectedItem.price*quantity + selectedExtras.reduce((a,b)=>a+b.price*quantity,0)).toFixed(2));
+  let orderObj={ name:nameLine, qty:quantity, price:subtotal, status:"Pending", mainItem:selectedItem.name, extras:[...selectedExtras], timeOrdered:new Date(), timePreparing:null, timeCompleted:null };
+  currentOrders.push(orderObj); lastAdded=orderObj;
   updateOrderList();
   selectedItem=null; selectedExtras=[]; quantity=1;
-  document.querySelectorAll('.item-btn, .extra-btn, .qty-btn').forEach(b=>b.classList.remove('active'));
-  updateSubtotalDisplay();
+  document.querySelectorAll('.item-btn,.extra-btn,.qty-btn').forEach(b=>b.classList.remove('active')); updateSubtotalDisplay();
 }
 
-// ===== UPDATE ORDER LIST =====
+// ===== ORDER LIST =====
 function updateOrderList(){
-  const listDiv=document.getElementById("orderList");
-  listDiv.innerHTML="";
+  const listDiv=document.getElementById("orderList"); listDiv.innerHTML="";
   let total=0;
   currentOrders.forEach((o,index)=>{
     total+=o.price;
-    const div=document.createElement("div");
-    div.classList.add("order-item");
-    div.innerHTML=`<span>${o.name} x ${o.qty} – RM ${o.price.toFixed(2)}</span>
-    <button class="delete-btn" onclick="deleteOrder(${index})">Delete</button>
-    <button class="status-btn" onclick="changeStatus(${index})">${o.status}</button>`;
+    const div=document.createElement("div"); div.classList.add("order-item"); 
+    div.innerHTML=`${o.name} x ${o.qty} – RM ${o.price.toFixed(2)} <span class="order-status status-${o.status}">${o.status}</span>`;
+    div.onclick=()=>{ openModal(o); };
     listDiv.appendChild(div);
   });
   document.getElementById("grandTotal").innerText=`Total: RM ${total.toFixed(2)}`;
-  updateAnalytics();
 }
 
-// ===== DELETE =====
-function deleteOrder(index){ 
-  const o=currentOrders[index];
-  // restore stock
-  const mainIndex = menu.findIndex(m=>m.name===o.mainItem);
-  if(mainIndex>-1) menu[mainIndex].stock+=o.qty;
-  for(const ex of o.extras){
-    const exIndex = extras.findIndex(e=>e.name===ex.name);
-    if(exIndex>-1) extras[exIndex].stock+=o.qty;
-  }
-  currentOrders.splice(index,1); updateOrderList(); renderMenu(); renderExtras(); 
+// ===== MODAL =====
+function openModal(order){
+  document.getElementById("modalContent").innerHTML=`
+    <p><strong>${order.name}</strong></p>
+    <p>Qty: ${order.qty}</p>
+    <p>Subtotal: RM ${order.price.toFixed(2)}</p>
+    <p>Status: ${order.status}</p>
+    <p>Time Ordered: ${formatDate(order.timeOrdered)}</p>
+    <p>Time Preparing: ${order.timePreparing?formatDate(order.timePreparing):'-'}</p>
+    <p>Time Completed: ${order.timeCompleted?formatDate(order.timeCompleted):'-'}</p>
+    <button onclick="deleteOrderModal()">Delete Order</button>`;
+  document.getElementById("orderModal").style.display="flex";
+  modalOrder = order;
 }
+function closeModal(){ document.getElementById("orderModal").style.display="none"; modalOrder=null; }
+let modalOrder=null;
+function deleteOrderModal(){ if(modalOrder){ deleteOrder(currentOrders.indexOf(modalOrder)); closeModal(); } }
 
-// ===== RESET =====
-function resetOrder(){
-  currentOrders=[]; selectedItem=null; selectedExtras=[]; quantity=1; paymentMethod="";
-  document.querySelectorAll('.item-btn, .extra-btn, .qty-btn, .payment-btn').forEach(b=>b.classList.remove('active'));
-  updateOrderList(); document.getElementById("ackButtons").style.display="none";
-  renderMenu(); renderExtras(); updateSubtotalDisplay();
-}
+// ===== DATE FORMAT =====
+function formatDate(d){ if(!d) return ''; return `${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`; }
 
-// ===== UNDO LAST =====
-function undoLast(){
-  if(!lastAdded){ alert("Nothing to undo."); return; }
-  deleteOrder(currentOrders.indexOf(lastAdded));
-  lastAdded=null;
-}
+// ===== DELETE, RESET, UNDO =====
+function deleteOrder(index){ currentOrders.splice(index,1); updateOrderList(); renderMenu(); renderExtras(); }
+function resetOrder(){ currentOrders=[]; lastAdded=null; selectedItem=null; selectedExtras=[]; quantity=1; paymentMethod=""; document.querySelectorAll('.item-btn,.extra-btn,.qty-btn,.payment-btn').forEach(b=>b.classList.remove('active')); updateOrderList(); updateSubtotalDisplay(); renderMenu(); renderExtras(); document.getElementById("ackButtons").style.display="none"; document.getElementById("orderDoneBtn").style.display="none"; }
+function undoLast(){ if(!lastAdded){ alert("Nothing to undo."); return; } deleteOrder(currentOrders.indexOf(lastAdded)); lastAdded=null; }
 
-// ===== CHANGE STATUS =====
-function changeStatus(index){
-  const order = currentOrders[index];
-  if(order.status==="Pending") order.status="Preparing";
-  else if(order.status==="Preparing") order.status="Ready";
-  else if(order.status==="Ready") order.status="Completed";
-  updateOrderList();
-}
-
-// ===== SUBMIT =====
-function submitOrders(){
-  if(currentOrders.length===0){ alert("Select items to order."); return; }
-  if(!paymentMethod){ alert("Select payment method."); return; }
-  // decrease stock
-  currentOrders.forEach(o=>{
-    const mainIndex = menu.findIndex(m=>m.name===o.mainItem);
-    if(mainIndex>-1) menu[mainIndex].stock-=o.qty;
-    for(const ex of o.extras){
-      const exIndex = extras.findIndex(e=>e.name===ex.name);
-      if(exIndex>-1) extras[exIndex].stock-=o.qty;
-    }
-  });
-  localStorage.setItem("burgrix_pending_orders", JSON.stringify(currentOrders));
-  saveOrderToHistory(currentOrders);
-  currentOrders=[]; lastAdded=null;
-  updateOrderList(); renderMenu(); renderExtras();
-  document.getElementById("ackButtons").style.display="block";
-  showAckMessage("Orders Stored! ✅","#0073e6");
-}
-
-// ===== ACKNOWLEDGMENT =====
+// ===== ACK =====
+function submitOrders(){ if(currentOrders.length===0){ alert("Select items to order."); return; } if(!paymentMethod){ alert("Select payment method."); return; } document.getElementById("ackButtons").style.display="block"; showAckMessage("Orders Submitted ✅","#0073e6"); }
 function ackPayment(){ showAckMessage("Payment Received ✅","#00b050"); }
-function ackPrepare(){ showAckMessage("Order is now in preparation 🔶","#ff9900"); }
+function ackPrepare(){ currentOrders.forEach(o=>{o.status="Preparing"; o.timePreparing=new Date();}); updateOrderList(); showAckMessage("Order in Preparation 🔶","#ff9900"); document.getElementById("orderDoneBtn").style.display="block"; }
+function markOrderDone(){ currentOrders.forEach(o=>{o.status="Completed"; o.timeCompleted=new Date();}); updateOrderList(); showAckMessage("Order Completed ✅","#28a745"); document.getElementById("orderDoneBtn").style.display="none"; }
+
+// ===== ACK MESSAGE =====
 function showAckMessage(msg,bg="#00b050"){ const d=document.createElement("div"); d.innerText=msg; Object.assign(d.style,{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",background:bg,color:"#fff",padding:"20px 30px",borderRadius:"10px",fontSize:"18px",fontWeight:"bold",boxShadow:"0 4px 12px rgba(0,0,0,0.4)",zIndex:9999,textAlign:"center"}); document.body.appendChild(d); setTimeout(()=>{d.remove()},2000); }
 
-// ===== ORDER HISTORY =====
-function saveOrderToHistory(orderArray){
-  let history=JSON.parse(localStorage.getItem("burgrix_order_history"))||[];
-  const snapshot=orderArray.map(o=>`${o.name} x${o.qty} RM${o.price.toFixed(2)}`);
-  history.unshift(snapshot);
-  if(history.length>5) history=history.slice(0,5);
-  localStorage.setItem("burgrix_order_history", JSON.stringify(history));
-  updateRecentOrders();
-}
-function updateRecentOrders(){
-  const recentDiv=document.getElementById("recentOrders");
-  const history=JSON.parse(localStorage.getItem("burgrix_order_history"))||[];
-  if(history.length===0){ recentDiv.innerText="No orders yet."; return; }
-  recentDiv.innerHTML="";
-  history.forEach((order,index)=>{ const div=document.createElement("div"); div.style.borderBottom="1px solid #ccc"; div.style.padding="3px 0"; div.innerText=`#${index+1}: ${order.join(", ")}`; recentDiv.appendChild(div); });
-}
+// ===== ADMIN =====
+function unlockAdmin(){ let pass=document.getElementById("adminPass").value; if(pass==="burgrix123"){ document.getElementById("adminContent").style.display="block"; } else{ alert("Incorrect password"); } }
+function addNewMenu(){ const name=document.getElementById("newMenuName").value.trim(); const price=parseFloat(document.getElementById("newMenuPrice").value); const stock=parseInt(document.getElementById("newMenuStock").value); if(!name||isNaN(price)||isNaN(stock)){ alert("Fill all fields correctly"); return; } menu.push({name,price,stock}); document.getElementById("newMenuName").value=""; document.getElementById("newMenuPrice").value=""; document.getElementById("newMenuStock").value=""; renderMenu(); }
+function addNewExtra(){ const name=document.getElementById("newExtraName").value.trim(); const price=parseFloat(document.getElementById("newExtraPrice").value); const stock=parseInt(document.getElementById("newExtraStock").value); if(!name||isNaN(price)||isNaN(stock)){ alert("Fill all fields correctly"); return; } extras.push({name,price,stock}); document.getElementById("newExtraName").value=""; document.getElementById("newExtraPrice").value=""; document.getElementById("newExtraStock").value=""; renderExtras(); }
+function renderEditMenu(){ const div=document.getElementById("editMenuList"); div.innerHTML=""; menu.forEach(m=>{ const d=document.createElement("div"); d.innerText=`${m.name} – RM${m.price.toFixed(2)} (Stock:${m.stock})`; div.appendChild(d); }); }
+function renderEditExtras(){ const div=document.getElementById("editExtraList"); div.innerHTML=""; extras.forEach(e=>{ const d=document.createElement("div"); d.innerText=`${e.name} – RM${e.price.toFixed(2)} (Stock:${e.stock})`; div.appendChild(d); }); }
 
-// ===== ANALYTICS =====
-function updateAnalytics(){
-  let totalSales=0; let totalOrders=0; let itemCount={};
-  currentOrders.forEach(o=>{
-    totalSales+=o.price; totalOrders+=o.qty;
-    if(!itemCount[o.mainItem]) itemCount[o.mainItem]=0;
-    itemCount[o.mainItem]+=o.qty;
-  });
-  let report=`Total Orders: ${totalOrders}<br>Total Sales: RM ${totalSales.toFixed(2)}<br>Popular Items:<br>`;
-  for(const [item,count] of Object.entries(itemCount)) report+=`${item}: ${count}<br>`;
-  document.getElementById("salesReport").innerHTML=report;
-}
-
-window.addEventListener('load',()=>{ updateRecentOrders(); updateAnalytics(); renderMenu(); renderExtras(); updateSubtotalDisplay(); });
+// ===== INIT =====
+window.onload=()=>{ renderMenu(); renderExtras(); updateSubtotalDisplay(); showSection(1); };
 </script>
 
 </body>
