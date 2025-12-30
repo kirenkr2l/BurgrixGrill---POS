@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BURGRIX POS</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #fff7f2;
+  margin: 0;
+  padding: 15px;
+}
+h1 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+.section {
+  margin-bottom: 15px;
+}
+button {
+  width: 100%;
+  padding: 14px;
+  margin: 5px 0;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+}
+.menu button { background: #ff6a00; color: #fff; }
+.payment button { background: #444; color: #fff; }
+.active { outline: 3px solid #00b050; }
+.submit {
+  background: #00b050;
+  color: #fff;
+  font-size: 18px;
+}
+.total {
+  font-size: 20px;
+  text-align: center;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🍔 BURGRIX POS</h1>
+
+<div class="section menu">
+  <h3>Select Item</h3>
+  <button onclick="selectItem('Chicken Burger',13.9)">Chicken Burger – RM13.90</button>
+  <button onclick="selectItem('Mutton Burger',17.9)">Mutton Burger – RM17.90</button>
+  <button onclick="selectItem('Fish Burger',15.9)">Fish Burger – RM15.90</button>
+  <button onclick="selectItem('Crispy Tandoori Burger',16.9)">Tandoori Burger – RM16.90</button>
+  <button onclick="selectItem('Grilled Chicken Chop',15.9)">Chicken Chop – RM15.90</button>
+  <button onclick="selectItem('Fish & Chips',16.9)">Fish & Chips – RM16.90</button>
+</div>
+
+<div class="section">
+  <h3>Quantity</h3>
+  <input type="number" id="qty" value="1" min="1" style="width:100%;padding:12px;font-size:16px;">
+</div>
+
+<div class="section payment">
+  <h3>Payment</h3>
+  <button onclick="selectPayment('Cash')">Cash</button>
+  <button onclick="selectPayment('QR – Maybank')">QR – Maybank</button>
+  <button onclick="selectPayment('QR – Touch n Go')">QR – Touch n Go</button>
+  <button onclick="selectPayment('PH – PowerHouzz')">PH – PowerHouzz</button>
+</div>
+
+<div class="total" id="total">Total: RM 0.00</div>
+
+<button class="submit" onclick="submitOrder()">SUBMIT ORDER</button>
+
+<script>
+let selectedItem = "";
+let price = 0;
+let payment = "";
+
+function selectItem(item, p) {
+  selectedItem = item;
+  price = p;
+  updateTotal();
+}
+
+function selectPayment(p) {
+  payment = p;
+}
+
+function updateTotal() {
+  let qty = document.getElementById("qty").value;
+  document.getElementById("total").innerText =
+    "Total: RM " + (qty * price).toFixed(2);
+}
+
+document.getElementById("qty").addEventListener("input", updateTotal);
+
+function submitOrder() {
+  if (!selectedItem || !payment) {
+    alert("Please select item and payment");
+    return;
+  }
+
+  let qty = document.getElementById("qty").value;
+  let total = (qty * price).toFixed(2);
+
+  let order = {
+    time: new Date().toLocaleTimeString(),
+    item: selectedItem,
+    qty: qty,
+    total: total,
+    payment: payment
+  };
+
+  let orders = JSON.parse(localStorage.getItem("burgrix_orders")) || [];
+  orders.push(order);
+  localStorage.setItem("burgrix_orders", JSON.stringify(orders));
+
+  alert("Order Saved ✅");
+  location.reload();
+}
+</script>
+
+</body>
+</html>
