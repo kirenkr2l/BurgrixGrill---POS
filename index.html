@@ -162,9 +162,35 @@ function submitOrders(){
   .catch(err=>alert("❌ Error: "+err));
 }
 
-// ACK BUTTONS
-function ackPayment(){ alert("Payment Received ✅"); }
-function ackPrepare(){ alert("Order is now in preparation ✅"); }
+// ACK BUTTONS WITH COLOR-COLORED POPUP
+function ackPayment() { showAckMessage("Payment Received ✅", "#00b050"); }   // green
+function ackPrepare() { showAckMessage("Order is now in preparation 🔶", "#ff9900"); } // orange
+
+function showAckMessage(msg, bgColor="#00b050"){
+  const msgDiv=document.createElement("div");
+  msgDiv.innerText=msg;
+  msgDiv.style.position="fixed";
+  msgDiv.style.top="50%";
+  msgDiv.style.left="50%";
+  msgDiv.style.transform="translate(-50%, -50%)";
+  msgDiv.style.background=bgColor;
+  msgDiv.style.color="#fff";
+  msgDiv.style.padding="20px 30px";
+  msgDiv.style.borderRadius="10px";
+  msgDiv.style.fontSize="18px";
+  msgDiv.style.fontWeight="bold";
+  msgDiv.style.boxShadow="0 4px 12px rgba(0,0,0,0.4)";
+  msgDiv.style.zIndex=9999;
+  msgDiv.style.textAlign="center";
+  document.body.appendChild(msgDiv);
+  
+  // Fade out after 2 seconds
+  setTimeout(()=>{
+    msgDiv.style.transition="opacity 0.5s";
+    msgDiv.style.opacity=0;
+    setTimeout(()=>{ msgDiv.remove(); }, 500);
+  }, 2000);
+}
 
 // AUTO ADD ITEM TO ORDER WHEN SELECTED
 document.querySelectorAll('.qty-btn').forEach(btn=>btn.addEventListener('click', addToOrder));
